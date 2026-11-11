@@ -1,5 +1,17 @@
 C:\Users\adele\OneDrive\Documentos\NetBeansProjects\RuedaLibre\src\main\java\Conexion\Conexion.java
 C:\Users\adele\OneDrive\Documentos\NetBeansProjects\RuedaLibre\src\main\java\Conexion\PruebaConexion.java
+C:\Users\adele\OneDrive\Documentos\NetBeansProjects\RuedaLibre\src\main\java\controlador\AccesorioServlet.java
+C:\Users\adele\OneDrive\Documentos\NetBeansProjects\RuedaLibre\src\main\java\controlador\AlquileresServlet.java
 C:\Users\adele\OneDrive\Documentos\NetBeansProjects\RuedaLibre\src\main\java\controlador\ClienteServlet.java
+C:\Users\adele\OneDrive\Documentos\NetBeansProjects\RuedaLibre\src\main\java\controlador\EquipoServlet.java
+C:\Users\adele\OneDrive\Documentos\NetBeansProjects\RuedaLibre\src\main\java\controlador\MantenimientoServlet.java
+C:\Users\adele\OneDrive\Documentos\NetBeansProjects\RuedaLibre\src\main\java\dao\AccesorioDAO.java
+C:\Users\adele\OneDrive\Documentos\NetBeansProjects\RuedaLibre\src\main\java\dao\AlquileresDAO.java
 C:\Users\adele\OneDrive\Documentos\NetBeansProjects\RuedaLibre\src\main\java\dao\ClienteDAO.java
+C:\Users\adele\OneDrive\Documentos\NetBeansProjects\RuedaLibre\src\main\java\dao\EquipoDAO.java
+C:\Users\adele\OneDrive\Documentos\NetBeansProjects\RuedaLibre\src\main\java\dao\MantenimientoDAO.java
+C:\Users\adele\OneDrive\Documentos\NetBeansProjects\RuedaLibre\src\main\java\modelo\Accesorio.java
+C:\Users\adele\OneDrive\Documentos\NetBeansProjects\RuedaLibre\src\main\java\modelo\Alquileres.java
 C:\Users\adele\OneDrive\Documentos\NetBeansProjects\RuedaLibre\src\main\java\modelo\Cliente.java
+C:\Users\adele\OneDrive\Documentos\NetBeansProjects\RuedaLibre\src\main\java\modelo\Equipo.java
+C:\Users\adele\OneDrive\Documentos\NetBeansProjects\RuedaLibre\src\main\java\modelo\Mantenimiento.java
