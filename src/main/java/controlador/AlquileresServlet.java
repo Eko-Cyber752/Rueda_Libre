@@ -6,11 +6,13 @@ package controlador;
 
 import dao.*;
 import modelo.Alquileres;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.*;
+
 import javax.servlet.*;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
@@ -26,19 +28,44 @@ public class AlquileresServlet extends HttpServlet {
             throws ServletException, IOException {
 
         try {
-            req.setAttribute("clientes", new ClienteDAO().listar());
-            req.setAttribute("equipos", new EquipoDAO().listar());
-            req.setAttribute("accesorios", new AccesorioDAO().listar());
-            req.setAttribute("alquileres", dao.listarAlquileres());
 
+            // Mostrar comprobante de un alquiler finalizado
+            String comprobante = req.getParameter("comprobante");
+
+            if (comprobante != null) {
+                int id = Integer.parseInt(comprobante);
+
+                req.setAttribute("comprobante", dao.comprobante(id));
+
+                req.getRequestDispatcher("/comprobante.jsp")
+                   .forward(req, resp);
+                return;
+            }
+
+            // Cargar información de la página de alquileres
+            req.setAttribute("clientes",
+                new ClienteDAO().listar());
+
+            req.setAttribute("equipos",
+                new EquipoDAO().listar());
+
+            req.setAttribute("accesorios",
+                new AccesorioDAO().listar());
+
+            req.setAttribute("alquileres",
+                dao.listarAlquileres());
+
+            // Mostrar formulario de devolución
             String detalle = req.getParameter("detalle");
 
             if (detalle != null) {
                 int id = Integer.parseInt(detalle);
 
                 req.setAttribute("detalleId", id);
+
                 req.setAttribute("detalleEquipos",
                     dao.equiposDelAlquiler(id));
+
                 req.setAttribute("detalleAccesorios",
                     dao.accesoriosDelAlquiler(id));
             }
@@ -59,8 +86,10 @@ public class AlquileresServlet extends HttpServlet {
         req.setCharacterEncoding("UTF-8");
 
         try {
+
             String accion = req.getParameter("accion");
 
+            // CANCELAR RESERVA
             if ("cancelar".equals(accion)) {
 
                 int id = Integer.parseInt(
@@ -68,6 +97,7 @@ public class AlquileresServlet extends HttpServlet {
 
                 dao.cancelar(id);
 
+            // ENTREGAR EQUIPOS
             } else if ("entregar".equals(accion)) {
 
                 int id = Integer.parseInt(
@@ -78,17 +108,20 @@ public class AlquileresServlet extends HttpServlet {
 
                 dao.entregar(id, efectivo);
 
+            // REGISTRAR RESERVA
             } else if ("reservar".equals(accion)) {
 
-                Alquileres a = new Alquileres();
+                Alquileres alquiler = new Alquileres();
 
-                a.setIdCliente(Integer.parseInt(
+                alquiler.setIdCliente(Integer.parseInt(
                     req.getParameter("id_cliente")));
 
-                a.setFechaEstimada(Timestamp.valueOf(
-                    LocalDateTime.parse(
-                        req.getParameter("fecha_estimada"))));
+                String fecha = req.getParameter("fecha_estimada");
 
+                alquiler.setFechaEstimada(Timestamp.valueOf(
+                    LocalDateTime.parse(fecha)));
+
+                // Equipos seleccionados
                 String[] seleccion =
                     req.getParameterValues("equipos");
 
@@ -103,34 +136,39 @@ public class AlquileresServlet extends HttpServlet {
                     equipos.add(Integer.parseInt(id));
                 }
 
-                a.setEquipos(equipos);
+                alquiler.setEquipos(equipos);
 
+                // Accesorios opcionales
                 Map<Integer, Integer> accesorios =
                     new HashMap<>();
 
-                String[] seleccionAcc =
+                String[] seleccionAccesorios =
                     req.getParameterValues("accesorios");
 
-                if (seleccionAcc != null) {
-                    for (String id : seleccionAcc) {
+                if (seleccionAccesorios != null) {
 
-                        int idAcc = Integer.parseInt(id);
+                    for (String id : seleccionAccesorios) {
+
+                        int idAccesorio = Integer.parseInt(id);
 
                         int cantidad = Integer.parseInt(
-                            req.getParameter("cantidad_" + idAcc));
+                            req.getParameter(
+                                "cantidad_" + idAccesorio));
 
                         if (cantidad <= 0) {
                             throw new IllegalArgumentException(
-                                "Cantidad incorrecta.");
+                                "Cantidad de accesorios incorrecta.");
                         }
 
-                        accesorios.put(idAcc, cantidad);
+                        accesorios.put(idAccesorio, cantidad);
                     }
                 }
 
-                a.setAccesorios(accesorios);
-                dao.reservar(a);
+                alquiler.setAccesorios(accesorios);
 
+                dao.reservar(alquiler);
+
+            // DEVOLVER EQUIPOS Y REGISTRAR PAGO
             } else if ("devolver".equals(accion)) {
 
                 int id = Integer.parseInt(
@@ -146,14 +184,14 @@ public class AlquileresServlet extends HttpServlet {
                         req.getParameter("monto_recibido"));
                 }
 
-                Map<Integer, Boolean> danados = new HashMap<>();
-                Map<Integer, Integer> extraviados = new HashMap<>();
+                // Equipos dañados
+                Map<Integer, Boolean> danados =
+                    new HashMap<>();
 
-                // Identificar equipos dañados.
-                for (Map<String, Object> e :
+                for (Map<String, Object> equipo :
                         dao.equiposDelAlquiler(id)) {
 
-                    int idEquipo = (Integer)e.get("id");
+                    int idEquipo = (Integer) equipo.get("id");
 
                     String valor = req.getParameter(
                         "danado_" + idEquipo);
@@ -162,11 +200,15 @@ public class AlquileresServlet extends HttpServlet {
                         "SI".equals(valor));
                 }
 
-                // Leer cantidades de accesorios extraviados.
-                for (Map<String, Object> a :
+                // Accesorios extraviados
+                Map<Integer, Integer> extraviados =
+                    new HashMap<>();
+
+                for (Map<String, Object> accesorio :
                         dao.accesoriosDelAlquiler(id)) {
 
-                    int idAccesorio = (Integer)a.get("id");
+                    int idAccesorio =
+                        (Integer) accesorio.get("id");
 
                     int cantidad = Integer.parseInt(
                         req.getParameter(
@@ -178,11 +220,18 @@ public class AlquileresServlet extends HttpServlet {
                 dao.devolver(id, danados, extraviados,
                     metodo, efectivo, referencia);
 
+                // Después de devolver, mostrar el comprobante
+                resp.sendRedirect(
+                    req.getContextPath()
+                    + "/alquileres?comprobante=" + id);
+                return;
+
             } else {
                 throw new IllegalArgumentException(
                     "Acción desconocida.");
             }
 
+            // Regresar al listado
             resp.sendRedirect(
                 req.getContextPath() + "/alquileres");
 

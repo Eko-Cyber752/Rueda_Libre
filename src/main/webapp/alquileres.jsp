@@ -3,9 +3,10 @@
 <%@page import="modelo.Cliente,modelo.Equipo,modelo.Accesorio"%>
 
 <%!
-    String limpiar(String t) {
-        if (t == null) return "";
-        return t.replace("&", "&amp;")
+    String limpiar(Object valor) {
+        if (valor == null) return "";
+        return valor.toString()
+                .replace("&", "&amp;")
                 .replace("<", "&lt;")
                 .replace(">", "&gt;")
                 .replace("\"", "&quot;")
@@ -54,8 +55,8 @@
 
 <nav class="navbar navbar-dark bg-primary">
     <div class="container">
-        <a href="<%= request.getContextPath() %>/index.html"
-           class="navbar-brand">
+        <a class="navbar-brand"
+           href="<%= request.getContextPath() %>/index.html">
             Rueda Libre
         </a>
     </div>
@@ -69,15 +70,15 @@
     </a>
 
     <h2>Gestión de Alquileres</h2>
+
     <p class="text-muted">
-        Registro de reservas, entrega y devolución de equipos.
+        Registrar reservas, entregar, cancelar y devolver equipos.
     </p>
 
-    <!-- MENSAJES -->
     <% if (request.getAttribute("error") != null) { %>
 
     <div class="alert alert-danger">
-        <%= limpiar(String.valueOf(request.getAttribute("error"))) %>
+        <%= limpiar(request.getAttribute("error")) %>
     </div>
 
     <% } %>
@@ -94,13 +95,18 @@
             <form action="<%= request.getContextPath() %>/alquileres"
                   method="post">
 
-                <input type="hidden" name="accion" value="reservar">
+                <input type="hidden"
+                       name="accion"
+                       value="reservar">
 
+                <!-- CLIENTE -->
                 <div class="mb-3">
+
                     <label class="form-label">Cliente</label>
 
                     <select name="id_cliente"
-                            class="form-select" required>
+                            class="form-select"
+                            required>
 
                         <option value="">
                             Seleccione un cliente
@@ -122,6 +128,7 @@
                         } %>
 
                     </select>
+
                 </div>
 
                 <!-- EQUIPOS -->
@@ -143,9 +150,9 @@
                                         "DISPONIBLE".equals(e.getEstado());
 
                                     boolean bateriaCorrecta =
-                                        !"SCOOTER".equals(e.getTipo()) ||
-                                        (e.getBateria() != null &&
-                                         e.getBateria() >= 30);
+                                        !"SCOOTER".equals(e.getTipo())
+                                        || (e.getBateria() != null
+                                        && e.getBateria() >= 30);
 
                                     if (disponible && bateriaCorrecta) {
                                         disponibles++;
@@ -153,8 +160,8 @@
 
                         <div class="form-check mb-2">
 
-                            <input type="checkbox"
-                                   class="form-check-input"
+                            <input class="form-check-input"
+                                   type="checkbox"
                                    name="equipos"
                                    id="equipo<%= e.getIdEquipo() %>"
                                    value="<%= e.getIdEquipo() %>">
@@ -176,9 +183,11 @@
                         } %>
 
                         <% if (disponibles == 0) { %>
+
                         <p class="text-muted mb-0">
                             No hay equipos disponibles.
                         </p>
+
                         <% } %>
 
                     </div>
@@ -218,6 +227,7 @@
                                 </label>
 
                             </div>
+
                         </div>
 
                         <div class="col-md-4">
@@ -253,7 +263,7 @@
 
                 </div>
 
-                <button class="btn btn-primary" type="submit">
+                <button type="submit" class="btn btn-primary">
                     Registrar reserva
                 </button>
 
@@ -277,7 +287,7 @@
                     <tr>
                         <th>ID</th>
                         <th>Cliente</th>
-                        <th>Devolución estimada</th>
+                        <th>Fecha estimada</th>
                         <th>Estado</th>
                         <th>Depósito</th>
                         <th>Acciones</th>
@@ -298,11 +308,11 @@
                         <td><%= id %></td>
 
                         <td>
-                            <%= limpiar((String) a.get("cliente")) %>
+                            <%= limpiar(a.get("cliente")) %>
                         </td>
 
                         <td>
-                            <%= a.get("estimada") %>
+                            <%= limpiar(a.get("estimada")) %>
                         </td>
 
                         <td>
@@ -329,6 +339,12 @@
 
                             <span class="badge bg-danger">
                                 CANCELADO
+                            </span>
+
+                            <% } else { %>
+
+                            <span class="badge bg-secondary">
+                                <%= limpiar(estado) %>
                             </span>
 
                             <% } %>
@@ -398,6 +414,14 @@
                                 Devolver
                             </a>
 
+                            <!-- COMPROBANTE -->
+                            <% } else if ("FINALIZADO".equals(estado)) { %>
+
+                            <a class="btn btn-info btn-sm"
+                               href="<%= request.getContextPath() %>/alquileres?comprobante=<%= id %>">
+                                Ver comprobante
+                            </a>
+
                             <% } else { %>
 
                             <span class="text-muted">
@@ -414,6 +438,7 @@
                     } %>
 
                 </tbody>
+
             </table>
 
             <% if (alquileres == null || alquileres.isEmpty()) { %>
@@ -427,7 +452,7 @@
         </div>
     </div>
 
-    <!-- FORMULARIO DE DEVOLUCIÓN -->
+    <!-- DEVOLUCIÓN -->
     <% if (detalleId != null) { %>
 
     <div class="card mb-4" id="devolucion">
@@ -452,7 +477,7 @@
                 <h5>1. Estado de los equipos</h5>
 
                 <p class="text-muted">
-                    Marca los equipos que regresaron dañados.
+                    Marca solamente los equipos que regresaron dañados.
                 </p>
 
                 <% if (detalleEquipos != null) {
@@ -464,8 +489,8 @@
                 <div class="border rounded p-2 mb-2">
 
                     <strong>
-                        <%= limpiar((String) e.get("codigo")) %>
-                        - <%= limpiar((String) e.get("modelo")) %>
+                        <%= limpiar(e.get("codigo")) %>
+                        - <%= limpiar(e.get("modelo")) %>
                     </strong>
 
                     <div class="form-check mt-2">
@@ -508,7 +533,7 @@
                     <div class="col-md-8">
 
                         <label class="form-label">
-                            <%= limpiar((String) a.get("nombre")) %>
+                            <%= limpiar(a.get("nombre")) %>
                             (Alquilados: <%= cantidad %>)
                         </label>
 
@@ -543,6 +568,7 @@
 
                     <select name="metodo"
                             class="form-select"
+                            id="metodoPago"
                             required>
 
                         <option value="EFECTIVO">
@@ -594,8 +620,8 @@
                 </div>
 
                 <div class="alert alert-info">
-                    El sistema calculará automáticamente las horas,
-                    los retrasos, los daños y el depósito.
+                    El sistema calculará automáticamente las horas
+                    utilizadas, recargos, daños y depósito.
                 </div>
 
                 <button type="submit"

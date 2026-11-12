@@ -1,8 +1,12 @@
+controlador\ApiClientesServlet.class
+dao\ReporteDAO.class
 modelo\Accesorio.class
+controlador\ReporteServlet.class
 dao\AccesorioDAO.class
 modelo\Equipo.class
 controlador\EquipoServlet.class
 controlador\AccesorioServlet.class
+controlador\ApiEquiposServlet.class
 dao\MantenimientoDAO.class
 modelo\Mantenimiento.class
 controlador\MantenimientoServlet.class
