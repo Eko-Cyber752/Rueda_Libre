@@ -29,7 +29,7 @@ public class AlquileresServlet extends HttpServlet {
 
         try {
 
-            // Mostrar comprobante de un alquiler finalizado
+            
             String comprobante = req.getParameter("comprobante");
 
             if (comprobante != null) {
@@ -42,7 +42,7 @@ public class AlquileresServlet extends HttpServlet {
                 return;
             }
 
-            // Cargar información de la página de alquileres
+            
             req.setAttribute("clientes",
                 new ClienteDAO().listar());
 
@@ -55,7 +55,7 @@ public class AlquileresServlet extends HttpServlet {
             req.setAttribute("alquileres",
                 dao.listarAlquileres());
 
-            // Mostrar formulario de devolución
+            
             String detalle = req.getParameter("detalle");
 
             if (detalle != null) {
@@ -89,7 +89,7 @@ public class AlquileresServlet extends HttpServlet {
 
             String accion = req.getParameter("accion");
 
-            // CANCELAR RESERVA
+            
             if ("cancelar".equals(accion)) {
 
                 int id = Integer.parseInt(
@@ -97,7 +97,7 @@ public class AlquileresServlet extends HttpServlet {
 
                 dao.cancelar(id);
 
-            // ENTREGAR EQUIPOS
+            
             } else if ("entregar".equals(accion)) {
 
                 int id = Integer.parseInt(
@@ -108,7 +108,7 @@ public class AlquileresServlet extends HttpServlet {
 
                 dao.entregar(id, efectivo);
 
-            // REGISTRAR RESERVA
+            
             } else if ("reservar".equals(accion)) {
 
                 Alquileres alquiler = new Alquileres();
@@ -121,7 +121,7 @@ public class AlquileresServlet extends HttpServlet {
                 alquiler.setFechaEstimada(Timestamp.valueOf(
                     LocalDateTime.parse(fecha)));
 
-                // Equipos seleccionados
+                
                 String[] seleccion =
                     req.getParameterValues("equipos");
 
@@ -138,7 +138,7 @@ public class AlquileresServlet extends HttpServlet {
 
                 alquiler.setEquipos(equipos);
 
-                // Accesorios opcionales
+                
                 Map<Integer, Integer> accesorios =
                     new HashMap<>();
 
@@ -168,7 +168,7 @@ public class AlquileresServlet extends HttpServlet {
 
                 dao.reservar(alquiler);
 
-            // DEVOLVER EQUIPOS Y REGISTRAR PAGO
+            
             } else if ("devolver".equals(accion)) {
 
                 int id = Integer.parseInt(
@@ -184,7 +184,7 @@ public class AlquileresServlet extends HttpServlet {
                         req.getParameter("monto_recibido"));
                 }
 
-                // Equipos dañados
+                
                 Map<Integer, Boolean> danados =
                     new HashMap<>();
 
@@ -200,7 +200,7 @@ public class AlquileresServlet extends HttpServlet {
                         "SI".equals(valor));
                 }
 
-                // Accesorios extraviados
+               
                 Map<Integer, Integer> extraviados =
                     new HashMap<>();
 
@@ -220,7 +220,7 @@ public class AlquileresServlet extends HttpServlet {
                 dao.devolver(id, danados, extraviados,
                     metodo, efectivo, referencia);
 
-                // Después de devolver, mostrar el comprobante
+                
                 resp.sendRedirect(
                     req.getContextPath()
                     + "/alquileres?comprobante=" + id);
@@ -231,7 +231,7 @@ public class AlquileresServlet extends HttpServlet {
                     "Acción desconocida.");
             }
 
-            // Regresar al listado
+            
             resp.sendRedirect(
                 req.getContextPath() + "/alquileres");
 

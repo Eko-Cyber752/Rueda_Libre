@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 public class AlquileresDAO {
 
-    // REGISTRAR RESERVA
+    
     public int reservar(Alquileres a) throws SQLException {
         if (a.getEquipos() == null || a.getEquipos().isEmpty() || a.getAccesorios() == null) {
             throw new SQLException("Selecciona al menos un equipo.");
@@ -48,7 +48,7 @@ public class AlquileresDAO {
                     }
                 }
 
-                // VERIFICAR EQUIPOS
+                
                 for (int id : equipos) {
                     sql = "SELECT tipo,estado,bateria " + "FROM equipos WHERE id_equipo=? FOR UPDATE";
                     try (PreparedStatement ps = cn.prepareStatement(sql)) {
@@ -65,7 +65,7 @@ public class AlquileresDAO {
                     }
                 }
 
-                // VERIFICAR ACCESORIOS
+                
                 for (int id : accesorios.keySet()) {
                     int cantidad = accesorios.get(id);
                     if (cantidad <= 0) {
@@ -95,7 +95,7 @@ public class AlquileresDAO {
                     }
                 }
 
-                // CREAR RESERVA
+                
                 sql = "INSERT INTO alquileres " + "(id_cliente,fecha_reserva,fecha_estimada,estado,"
                     + "deposito_total,subtotal_equipos,subtotal_accesorios," + "recargo_retraso,costo_danos,total,"
                     + "deposito_aplicado_danos,deposito_devuelto," + "saldo_generado) "
@@ -113,7 +113,7 @@ public class AlquileresDAO {
                     }
                 }
 
-                // ASIGNAR EQUIPOS
+                
                 for (int id : equipos) {
                     sql = "INSERT INTO alquiler_equipos " + "(id_alquiler,id_equipo,tarifa_hora,"
                         + "precio_reposicion,cargo_dano) " + "SELECT ?,id_equipo,tarifa_hora,"
@@ -134,7 +134,7 @@ public class AlquileresDAO {
                     }
                 }
 
-                // ASIGNAR ACCESORIOS
+                
                 for (int id : accesorios.keySet()) {
                     sql = "INSERT INTO alquiler_accesorios " + "(id_alquiler,id_accesorio,cantidad,"
                         + "tarifa_fija,precio_reposicion," + "cantidad_extraviada) " + "SELECT ?,id_accesorio,?,tarifa_fija,"
@@ -157,7 +157,7 @@ public class AlquileresDAO {
         }
     }
 
-    // LISTAR ALQUILERES
+    
     public List<Map<String, Object>> listarAlquileres()
             throws SQLException {
         List<Map<String, Object>> lista = new ArrayList<>();
@@ -184,7 +184,7 @@ public class AlquileresDAO {
         return lista;
     }
 
-    // CANCELAR RESERVA
+    
     public void cancelar(int id) throws SQLException {
         try (Connection cn = Conexion.conectar()) {
             cn.setAutoCommit(false);
@@ -210,7 +210,7 @@ public class AlquileresDAO {
         }
     }
 
-    // ENTREGAR EQUIPOS: HERENCIA Y POLIMORFISMO
+    
     public void entregar(int id, BigDecimal recibido)
             throws SQLException {
         try (Connection cn = Conexion.conectar()) {
@@ -244,7 +244,7 @@ public class AlquileresDAO {
                             String codigo = rs.getString("codigo");
                             BigDecimal tarifa = rs.getBigDecimal("tarifa_hora");
 
-                            // POLIMORFISMO REAL
+                            
                             Vehiculos vehiculo;
                             if ("SCOOTER".equals(tipo)) {
                                 vehiculo = new Scooter(codigo, tarifa);
@@ -267,7 +267,7 @@ public class AlquileresDAO {
                     }
                 }
 
-                // DESCONTAR ACCESORIOS
+                
                 sql = "SELECT id_accesorio,cantidad " + "FROM alquiler_accesorios WHERE id_alquiler=?";
                 try (PreparedStatement ps = cn.prepareStatement(sql)) {
                     ps.setInt(1, id);
@@ -289,7 +289,7 @@ public class AlquileresDAO {
                     }
                 }
 
-                // COBRAR DEPOSITO
+                
                 sql = "INSERT INTO pagos " + "(id_alquiler,fecha,tipo,metodo,monto," + "monto_recibido,cambio,estado) "
                     + "VALUES (?,NOW(),'DEPOSITO','EFECTIVO'," + "?,?,?,'APROBADO')";
                 try (PreparedStatement ps = cn.prepareStatement(sql)) {
@@ -316,7 +316,7 @@ public class AlquileresDAO {
         }
     }
 
-    // HISTORIAL DE MOVIMIENTOS DE ACCESORIOS
+    
     private void movimiento(Connection cn, int accesorio, int alquiler, String tipo, int cantidad)
             throws SQLException {
         String sql = "INSERT INTO movimientos_accesorios " + "(id_accesorio,id_alquiler,fecha,tipo,cantidad) "
@@ -330,7 +330,7 @@ public class AlquileresDAO {
         }
     }
 
-    // EQUIPOS QUE PERTENECEN A UN ALQUILER
+    
     public List<Map<String, Object>> equiposDelAlquiler(int id)
             throws SQLException {
         List<Map<String, Object>> lista = new ArrayList<>();
@@ -354,7 +354,7 @@ public class AlquileresDAO {
         return lista;
     }
 
-    // ACCESORIOS DE UN ALQUILER
+    
     public List<Map<String, Object>> accesoriosDelAlquiler(int id)
             throws SQLException {
         List<Map<String, Object>> lista = new ArrayList<>();
@@ -377,7 +377,7 @@ public class AlquileresDAO {
         return lista;
     }
 
-    // DEVOLUCION Y COBRO
+    
     public void devolver(int id, Map<Integer, Boolean> danados, Map<Integer, Integer> extraviados,
             String metodo, BigDecimal recibido, String referencia) throws SQLException {
         if (!"EFECTIVO".equals(metodo) && !"TARJETA".equals(metodo)) {
@@ -415,7 +415,7 @@ public class AlquileresDAO {
                     ahora = rs.getTimestamp(1);
                 }
 
-                // HORAS UTILIZADAS
+                
                 long minutos = Math.max(0, (ahora.getTime() - entrega.getTime() + 59999)
                     / 60000);
                 long horas = Math.max(1, (minutos + 59) / 60);
@@ -427,7 +427,7 @@ public class AlquileresDAO {
                 BigDecimal recargo = BigDecimal.ZERO;
                 BigDecimal danos = BigDecimal.ZERO;
 
-                // PROCESAR EQUIPOS
+                
                 sql = "SELECT id_equipo,tarifa_hora," + "precio_reposicion " + "FROM alquiler_equipos " + "WHERE id_alquiler=?";
                 try (PreparedStatement ps = cn.prepareStatement(sql)) {
                     ps.setInt(1, id);
@@ -465,7 +465,7 @@ public class AlquileresDAO {
                                 }
                             }
 
-                            // MANTENIMIENTO AUTOMATICO
+                           
                             String consultar = "SELECT estado FROM equipos " + "WHERE id_equipo=?";
                             boolean mantenimiento;
                             try (PreparedStatement p = cn.prepareStatement(consultar)) {
@@ -488,7 +488,7 @@ public class AlquileresDAO {
                     }
                 }
 
-                // PROCESAR ACCESORIOS
+                
                 sql = "SELECT id_accesorio,cantidad," + "tarifa_fija,precio_reposicion " + "FROM alquiler_accesorios "
                     + "WHERE id_alquiler=?";
                 try (PreparedStatement ps = cn.prepareStatement(sql)) {
@@ -525,7 +525,7 @@ public class AlquileresDAO {
                     }
                 }
 
-                // DEPOSITO Y TOTAL
+                
                 BigDecimal aplicado = deposito.min(danos);
                 BigDecimal devuelto = deposito.subtract(aplicado);
                 BigDecimal deuda = danos.subtract(aplicado);
@@ -536,7 +536,7 @@ public class AlquileresDAO {
                 }
                 BigDecimal cambio = "EFECTIVO".equals(metodo) ? recibido.subtract(cobro) : BigDecimal.ZERO;
 
-                // REGISTRAR COBRO
+                
                 sql = "INSERT INTO pagos " + "(id_alquiler,fecha,tipo,metodo,monto,"
                     + "monto_recibido,cambio,estado,referencia) " + "VALUES (?,NOW(),'COBRO',?,?,?,?,'APROBADO',?)";
                 try (PreparedStatement ps = cn.prepareStatement(sql)) {
@@ -549,7 +549,7 @@ public class AlquileresDAO {
                     ps.executeUpdate();
                 }
 
-                // DEVOLVER DEPOSITO
+                
                 if (devuelto.signum() > 0) {
                     sql = "INSERT INTO pagos " + "(id_alquiler,fecha,tipo,metodo,monto," + "monto_recibido,cambio,estado) "
                         + "VALUES (?,NOW(),'DEVOLUCION_DEPOSITO'," + "?,?,0,0,'APROBADO')";
@@ -561,7 +561,7 @@ public class AlquileresDAO {
                     }
                 }
 
-                // REGISTRAR DEUDA
+                
                 if (deuda.signum() > 0) {
                     sql = "UPDATE clientes SET " + "saldo_pendiente=saldo_pendiente+? " + "WHERE id_cliente=?";
                     try (PreparedStatement ps = cn.prepareStatement(sql)) {
@@ -571,7 +571,7 @@ public class AlquileresDAO {
                     }
                 }
 
-                // FINALIZAR ALQUILER
+                
                 sql = "UPDATE alquileres SET " + "fecha_devolucion=?,estado='FINALIZADO',"
                     + "subtotal_equipos=?,subtotal_accesorios=?," + "recargo_retraso=?,costo_danos=?,total=?,"
                     + "deposito_aplicado_danos=?," + "deposito_devuelto=?,saldo_generado=? "
@@ -599,7 +599,7 @@ public class AlquileresDAO {
         }
     }
 
-    // COMPROBANTE
+    
     public Map<String, Object> comprobante(int id)
             throws SQLException {
         Map<String, Object> datos = new HashMap<>();
