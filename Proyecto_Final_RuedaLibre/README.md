@@ -13,7 +13,7 @@
 Alexis Humberto De León Campos // 7690-25-18160
 
 &#x20;
-**GitHub:** https://github.com/Eko-Cyber752/Rueda\_Libre.git
+**GitHub:** https://github.com/Eko-Cyber752/Rueda_Libre
 
 
 
